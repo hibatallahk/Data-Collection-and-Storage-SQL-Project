@@ -1,0 +1,24 @@
+import pandas as pd
+import requests  # Import the library for sending requests to the server
+from bs4 import BeautifulSoup  # Import the library for webpage parsing
+
+URL = 'https://code.s3.yandex.net/data-analyst-eng/chicago_weather_2017.html'
+req = requests.get(URL)  # GET-request
+soup = BeautifulSoup(req.text, 'lxml')
+
+#  parse the data on weather in Chicago in November 2017 from the website
+weather = soup.find('table', attrs={"id":"weather_records"})
+#names of columns for the dataframe
+heading_table = []
+for row in weather.find_all('th'): #<th> in html
+    heading_table.append(row.text)
+#getting the content for the dataframe
+content = []
+for row in weather.find_all('tr'):
+    if not row.find_all('th'): #ignore the first row of the table
+        content.append([element.text for element in row.find_all('td')])
+
+#parse into the weather dataframe
+weather_records = pd.DataFrame(content, columns = heading_table)
+print(weather_records)
+    
